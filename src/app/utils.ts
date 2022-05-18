@@ -1,7 +1,8 @@
+import cp from "child_process";
 import { join } from "path";
-import { writeFile, readFile } from "fs/promises";
 import { grey } from "chalk";
 import { CliUx } from "@oclif/core";
+import { writeFile, readFile } from "fs/promises";
 
 export function getBotPath(botName: string, ...segment: string[]) {
   return join(process.cwd(), botName, ...segment);
@@ -56,6 +57,20 @@ export async function loader(message: string, callback: () => unknown) {
 
   CliUx.ux.action.stop(`done. ${grey(`${Date.now() - time}ms`)}`);
 }
+
+export async function exec(
+  cmd: string,
+  options?: cp.CommonOptions
+): Promise<null> {
+  return new Promise((res, rej) => {
+    cp.exec(cmd, options, (err) => {
+      if (err) rej(err);
+      else res(null);
+    });
+  });
+}
+
+export const locales = ["en", "fr", "es", "de", "ja"];
 
 export const borderNone = {
   top: " ",

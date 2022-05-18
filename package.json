@@ -3,6 +3,7 @@
   "version": "1",
   "description": "CLI for make Discord bots in TypeScript quickly with discord.js",
   "author": "GhomKrosmonaute @GhomKrosmonaute",
+  "type": "commonjs",
   "bin": {
     "create-bot.ts": "./bin/run",
     "make-bot.ts": "./bin/run",
