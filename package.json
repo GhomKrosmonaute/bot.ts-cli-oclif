@@ -39,7 +39,7 @@
     "@types/figlet": "^1.5.4",
     "@types/inquirer": "^8.2.1",
     "@types/listr": "^0.14.4",
-    "@types/mocha": "^9.0.0",
+    "@types/mocha": "^9.1.1",
     "@types/node": "^16.9.4",
     "@types/string-similarity": "^4.0.0",
     "chai": "^4",
