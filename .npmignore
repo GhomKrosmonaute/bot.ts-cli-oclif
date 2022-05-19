@@ -1,2 +1,15 @@
-/bot.ts
-
+*-debug.log
+*-error.log
+yarn.lock
+package-lock.json
+pnpm-lock.yaml
+.idea
+.vscode
+.env
+/.nyc_output
+/src
+/lib
+/package-lock.json
+/tmp
+oclif.manifest.json
+/bot.ts/
