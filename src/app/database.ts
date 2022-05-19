@@ -31,7 +31,7 @@ const defaults = {
 };
 
 export const databases = [
-  new Database("sqlite", "vscode/sqlite3", {}),
+  new Database("sqlite", "@vscode/sqlite3", {}),
   new Database("mysql", "mysql2", {
     port: "3306",
     ...defaults,

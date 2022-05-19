@@ -3,9 +3,10 @@ import { join } from "path";
 import { CliUx } from "@oclif/core";
 import { writeFile, readFile } from "fs/promises";
 import { grey, redBright, green } from "chalk";
+import { validateNpm } from "is-valid-package-name";
 
-export function getBotPath(botName: string, ...segment: string[]) {
-  return join(process.cwd(), botName, ...segment);
+export function getBotPath(...segment: string[]) {
+  return join(process.cwd(), data.botName ?? "", ...segment);
 }
 
 export function getCliPath(...segments: string[]) {
@@ -51,12 +52,8 @@ export function colorizeCommand(command: string): string {
     .join(" ")}`;
 }
 
-export async function injectEnvLine(
-  botName: string,
-  name: string,
-  value: string
-) {
-  const env = await readFile(getBotPath(botName, ".env"), "utf8");
+export async function injectEnvLine(name: string, value: string) {
+  const env = await readFile(getBotPath(".env"), "utf8");
   const lines = env.split("\n");
   const index = lines.findIndex((line) => line.split("=")[0] === name);
 
@@ -64,7 +61,7 @@ export async function injectEnvLine(
 
   lines.push(`${name}="${value}"`);
 
-  await writeFile(getBotPath(botName, ".env"), lines.join("\n"), "utf8");
+  await writeFile(getBotPath(".env"), lines.join("\n"), "utf8");
 }
 
 export async function loader(message: string, callback: () => unknown) {
@@ -89,6 +86,20 @@ export async function exec(
   });
 }
 
+export function validateNameInput(name: string): true | never {
+  if (name.length < 2) {
+    return CliUx.ux.error("The bot name must be longer than 1");
+  }
+
+  const [isValid, reason] = validateNpm(name);
+
+  if (!isValid) {
+    return CliUx.ux.error(reason);
+  }
+
+  return true;
+}
+
 export const locales = ["en", "fr", "es", "de", "ja"];
 
 export const borderNone = {
@@ -103,3 +114,7 @@ export const borderNone = {
   horizontal: " ",
   vertical: " ",
 };
+
+export const data: {
+  botName?: string;
+} = {};

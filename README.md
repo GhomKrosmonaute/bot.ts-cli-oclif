@@ -9,10 +9,25 @@ CLI for make Discord bots in TypeScript quickly with discord.js
 [![Downloads/week](https://img.shields.io/npm/dw/oclif-hello-world.svg)](https://npmjs.org/package/oclif-hello-world)
 [![License](https://img.shields.io/npm/l/oclif-hello-world.svg)](https://github.com/oclif/hello-world/blob/main/package.json)
 
-## Install and create bot
+## Install create-bot.ts and create bot
 
-```sh
-$ yarn create bot.ts
-# or
-$ npx create-bot.ts
+```shell
+$ yarn add -g create-bot.ts
+$ create bot
 ```
+
+## Create bot without installing create-bot.ts
+
+```shell
+$ yarn create bot.ts bot
+# or
+$ npx create-bot.ts bot
+```
+
+## Usage
+<!-- usage -->
+
+## Commands
+<!-- commands -->
+
+

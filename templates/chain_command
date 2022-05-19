@@ -6,5 +6,5 @@ export default new app.Command<"all">()
   .setChannelType("all")
   .onRun(async (message) => {
     // todo: code here
-    return message.send("{{ name }} command is not yet implemented.")
+    return message.send("{{ Name }} command is not yet implemented.")
   })

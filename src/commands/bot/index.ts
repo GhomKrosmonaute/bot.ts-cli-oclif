@@ -1,21 +1,19 @@
-import { Command, CliUx, Flags } from "@oclif/core";
-import { validateNpm } from "is-valid-package-name";
-import { blueBright, grey } from "chalk";
+import { CliUx, Command, Flags } from "@oclif/core";
+import { blueBright, green, grey, bgBlack } from "chalk";
 import { Client } from "discord.js";
 import { prompt } from "inquirer";
 import figlet from "figlet";
-//import boxen from "boxen";
 import Listr from "listr";
 
 import {
-  borderNone,
   colorizeCommand,
+  data,
   exec,
   getBotPath,
-  injectEnvLine,
   locales,
+  validateNameInput,
 } from "../../app/utils";
-import { setupDatabase, initialize } from "../../app/actions";
+import { initialize, setupDatabase } from "../../app/actions";
 import { Database, databases } from "../../app/database";
 
 export class CreateBot extends Command {
@@ -60,23 +58,17 @@ export class CreateBot extends Command {
         default: "bot.ts",
       }));
 
-    {
-      if (name.length < 2) {
-        return this.error("The bot name must be longer than 1");
-      }
+    if (!validateNameInput(name)) return;
 
-      const [isValid, reason] = validateNpm(name);
-
-      if (!isValid) {
-        return this.error(reason);
-      }
-    }
+    data.botName = name;
 
     if (
       !(await CliUx.ux.confirm(
-        `Do you really want to create your project in the following directory?\n${blueBright(
-          getBotPath(name)
-        )} ${grey("[y/N]")}`
+        `${green(
+          "?"
+        )} Do you really want to create your project in the following directory?\n${blueBright(
+          getBotPath()
+        )} ${grey("[y/n]")}`
       ))
     )
       return process.exit(0);
@@ -109,23 +101,21 @@ export class CreateBot extends Command {
       for (const name in database.defaults) {
         const def = database.defaults[name];
 
-        const value = await CliUx.ux.prompt(
-          `${grey("==>")} What is the ${blueBright(name)}?`,
+        databaseEnv[`DB_${name.toUpperCase()}`] = await CliUx.ux.prompt(
+          `${grey("=>")} What is the ${blueBright(name)}?`,
           {
             required: !!def,
             default: def ?? undefined,
             type: name === "password" ? "hide" : "normal",
           }
         );
-
-        databaseEnv[`DB_${name.toUpperCase()}`] = value;
       }
     }
 
     const token =
       flags.token ??
       (await CliUx.ux.prompt(
-        `Now put your ${blueBright("Discord app token")}`,
+        `${green("?")} Now put your ${blueBright("Discord app token")}`,
         { required: true, type: "mask" }
       ));
 
@@ -143,10 +133,15 @@ export class CreateBot extends Command {
 
     const prefix =
       flags.prefix ??
-      (await CliUx.ux.prompt("There is still the prefix to configure!", {
-        required: true,
-        default: "!",
-      }));
+      (await CliUx.ux.prompt(
+        `${green("?")} There is still the ${blueBright(
+          "prefix"
+        )} to configure!`,
+        {
+          required: true,
+          default: "!",
+        }
+      ));
 
     const locale =
       flags.locale ??
@@ -199,16 +194,12 @@ export class CreateBot extends Command {
       {
         title: "Initialize bot.ts",
         task: () =>
-          initialize(name, token, prefix, locale, databaseEnv).then(
-            () => "Done"
-          ),
+          initialize(token, prefix, locale, databaseEnv)
+            .then(() => setupDatabase(databaseName))
+            .then(() => "Done"),
       },
       {
-        title: "Init database file",
-        task: () => setupDatabase(name, databaseName).then(() => "Done"),
-      },
-      {
-        title: "Install dependencies",
+        title: "Install bot.ts",
         task: () =>
           exec(
             manager === "yarn"
@@ -216,7 +207,7 @@ export class CreateBot extends Command {
               : manager === "npm"
               ? "npm i"
               : "pnpm install",
-            { cwd: getBotPath(name) }
+            { cwd: getBotPath() }
           ).then(() => "Done"),
       },
     ]);
@@ -237,9 +228,6 @@ export class CreateBot extends Command {
     const runCommand = manager === "npm" ? "npm run" : manager;
 
     this.log(`
-
-  -> ${colorizeCommand(`cd ./${name}`)} <-
-
   ${grey("# to quickly create a new file")}
     ${colorizeCommand("create command [name]")}
     ${colorizeCommand("create listener [ClientEvent]")}
@@ -261,7 +249,11 @@ export class CreateBot extends Command {
   ${grey("# to update the bot.ts framework")}
     ${colorizeCommand(runCommand + " update")}
 
-   `);
+${green("√")} Successfully generated your bot.
+${grey(
+  "Before using create-bot.ts scripts, go to the bot folder with"
+)} ${bgBlack(colorizeCommand(`cd ${name}`))}
+    `);
 
     process.exit(0);
   }
