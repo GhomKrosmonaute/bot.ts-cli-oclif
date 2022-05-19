@@ -10,7 +10,8 @@ import {
   validateNameInput,
 } from "../../app/utils"
 import { CliUx, Command } from "@oclif/core"
-import { blueBright, green } from "chalk"
+import { blueBright, green, grey } from "chalk"
+import { join, relative } from "path"
 
 export default class CreateCommand extends Command {
   static args = [{ name: "name" }]
@@ -33,17 +34,22 @@ export default class CreateCommand extends Command {
 
     if (!validateNameInput(name)) return
 
+    const commandPath = getBotPath("src", "commands", `${name}.ts`)
+
     await useTemplate(
       (context.mode === "chains" ? "chain_" : "") + "command",
       {
         name,
         Name: name[0].toUpperCase() + name.slice(1),
       },
-      getBotPath("src", "commands", `${name}.ts`)
+      commandPath
     )
 
     CliUx.ux.log(
-      `${green("√")} Successfully generated the ${blueBright(name)} command.`
+      `${green("√")} Successfully generated the ${blueBright(
+        name
+      )} command.\n${grey("=>")} ${blueBright(relative(__dirname, commandPath))}
+      `
     )
   }
 }
