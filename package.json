@@ -1,6 +1,6 @@
 {
   "name": "@ghom/create-bot.ts",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "CLI for make Discord bots in TypeScript quickly with discord.js",
   "author": "GhomKrosmonaute @GhomKrosmonaute",
   "type": "commonjs",
