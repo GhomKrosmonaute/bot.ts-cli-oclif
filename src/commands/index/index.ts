@@ -19,8 +19,9 @@ import { setupDatabase, initialize } from "../../app/actions";
 import { Database, databases } from "../../app/database";
 
 export class CreateBot extends Command {
+  static args = [{ name: "name" }];
+
   static flags = {
-    name: Flags.string({ char: "n" }),
     token: Flags.string({ char: "t" }),
     locale: Flags.string({ char: "l", options: locales }),
     prefix: Flags.string({ char: "p" }),
@@ -50,10 +51,10 @@ export class CreateBot extends Command {
       // )
     );
 
-    const { flags } = await this.parse(CreateBot);
+    const { flags, args } = await this.parse(CreateBot);
 
     const name =
-      flags.name ??
+      args.name ??
       (await CliUx.ux.prompt(`What is the ${blueBright("bot name")} ?`, {
         required: true,
         default: "bot.ts",
