@@ -119,6 +119,14 @@ export function validateNameInput(name: string): true | never {
   return true
 }
 
+export async function isOnBotDir(): Promise<boolean> {
+  const pkg = await readJSON(getBotPath("package.json"))
+  return (
+    pkg.devDependencies.hasOwnProperty("@ghom/create-bot.ts") ||
+    pkg.devDependencies.hasOwnProperty("make-bot.ts")
+  )
+}
+
 export const locales = ["en", "fr", "es", "de", "ja"]
 
 export const borderNone = {

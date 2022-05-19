@@ -1,8 +1,7 @@
 import { CliUx, Command, Flags } from "@oclif/core"
-import { blueBright, green, grey, bgBlack } from "chalk"
+import { blueBright, green, grey, bgBlack, red } from "chalk"
 import { Client } from "discord.js"
 import { prompt } from "inquirer"
-import figlet from "figlet"
 import Listr from "listr"
 
 import {
@@ -10,6 +9,7 @@ import {
   context,
   exec,
   getBotPath,
+  isOnBotDir,
   locales,
   Mode,
   printTitle,
@@ -37,6 +37,17 @@ export class CreateBot extends Command {
     await printTitle("bot.ts")
 
     const { flags, args } = await this.parse(CreateBot)
+
+    if (await isOnBotDir()) {
+      if (
+        !(await CliUx.ux.confirm(
+          `${green("?")} ${red(
+            "You are currently in a bot folder"
+          )}, are you sure you want to continue?`
+        ))
+      )
+        return
+    }
 
     context.mode = flags.codeStyle as Mode
 

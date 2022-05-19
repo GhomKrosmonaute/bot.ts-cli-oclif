@@ -4,11 +4,12 @@ import {
   checkMode,
   context,
   getBotPath,
+  isOnBotDir,
   printTitle,
   useTemplate,
   validateNameInput,
 } from "../../app/utils"
-import { CliUx, Command, Flags } from "@oclif/core"
+import { CliUx, Command } from "@oclif/core"
 import { blueBright, green } from "chalk"
 
 export default class CreateCommand extends Command {
@@ -16,6 +17,9 @@ export default class CreateCommand extends Command {
 
   async run() {
     const { args } = await this.parse(CreateCommand)
+
+    if (!(await isOnBotDir()))
+      return CliUx.ux.error("You are not in a bot.ts folder")
 
     await checkMode()
     await printTitle("bot.ts")
