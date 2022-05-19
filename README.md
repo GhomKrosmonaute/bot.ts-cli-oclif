@@ -12,7 +12,7 @@ CLI for make Discord bots in TypeScript quickly with discord.js
 ## Install create-bot.ts and create bot
 
 ```shell
-$ yarn add -g create-bot.ts
+$ yarn add -g @ghom/create-bot.ts
 $ create bot
 ```
 
@@ -23,11 +23,3 @@ $ yarn create bot.ts bot
 # or
 $ npx create-bot.ts bot
 ```
-
-## Usage
-<!-- usage -->
-
-## Commands
-<!-- commands -->
-
-

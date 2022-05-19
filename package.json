@@ -1,5 +1,5 @@
 {
-  "name": "create-bot.ts",
+  "name": "@ghom/create-bot.ts",
   "version": "1.0.0",
   "description": "CLI for make Discord bots in TypeScript quickly with discord.js",
   "author": "GhomKrosmonaute @GhomKrosmonaute",
@@ -76,7 +76,7 @@
     "format": "prettier --write src"
   },
   "engines": {
-    "node": ">=12.0.0"
+    "node": ">=16.14.2"
   },
   "bugs": "https://github.com/GhomKrosmonaute/create-bot.ts/issues",
   "keywords": [
