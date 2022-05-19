@@ -7,13 +7,13 @@ import {
   writeJSON,
 } from "./utils";
 import { CliUx } from "@oclif/core";
-import { blueBright, green, red } from "chalk";
-import databases from "./database";
+import { blueBright, green, grey, red } from "chalk";
+import databases, { Database } from "./database";
 import { writeFile } from "fs/promises";
 import { Client } from "discord.js";
 
 export async function setupDatabase(botName: string, databaseName: string) {
-  const pkg = await readJSON(getBotPath("package.json"));
+  const pkg = await readJSON(getBotPath(botName, "package.json"));
   const database = databases.find((db) => db.name === databaseName);
 
   if (!database) throw new Error("Oh shit!");
@@ -24,55 +24,46 @@ export async function setupDatabase(botName: string, databaseName: string) {
     else pkg.dependencies[db.packageName] = "latest";
   }
 
-  await writeJSON(getBotPath("package.json"), pkg);
+  await writeJSON(getBotPath(botName, "package.json"), pkg);
 
   await useTemplate(
     databaseName,
     {},
     getBotPath(botName, "src", "app", "database.ts")
   );
-
-  if (Object.keys(database.defaults).length > 0) {
-    CliUx.ux.log(`Now we will prepare the database.`);
-
-    for (const name in database.defaults) {
-      const def = database.defaults[name];
-
-      const value = await CliUx.ux.prompt(
-        `What is the ${blueBright("bot name")} ?`,
-        {
-          required: !!def,
-          default: def ?? undefined,
-        }
-      );
-
-      await injectEnvLine(`DB_${name.toUpperCase()}`, value);
-    }
-  }
-
-  CliUx.ux.log(`${green("Successfully")} prepared the database.`);
 }
 
 export async function initialize(
   botName: string,
   token: string,
   prefix: string,
-  locale: string
+  locale: string,
+  databaseEnv: Record<string, string>
 ) {
-  const conf = await readJSON(getBotPath("package.json"));
-  await writeJSON(getBotPath("package.json"), {
+  const conf = await readJSON(getBotPath(botName, "package.json"));
+  await writeJSON(getBotPath(botName, "package.json"), {
     ...conf,
     name: botName,
   });
 
-  await writeFile(getBotPath(".env"), "#\n# bot.ts\n#", "utf8");
+  await writeFile(
+    getBotPath(botName, ".env"),
+    "##############\n# bot.ts ENV #\n##############",
+    "utf8"
+  );
 
   const intents =
     "GUILDS,GUILD_MEMBERS,GUILD_BANS,GUILD_EMOJIS_AND_STICKERS,GUILD_INTEGRATIONS,GUILD_WEBHOOKS,GUILD_INVITES,GUILD_VOICE_STATES,GUILD_PRESENCES,GUILD_MESSAGES,GUILD_MESSAGE_REACTIONS,GUILD_MESSAGE_TYPING,DIRECT_MESSAGES,DIRECT_MESSAGE_REACTIONS,DIRECT_MESSAGE_TYPING";
 
-  await injectEnvLine("BOT_INTENTS", intents);
-  await injectEnvLine("BOT_PREFIX", prefix);
-  await injectEnvLine("BOT_LOCALE", locale);
+  await injectEnvLine(botName, "BOT_INTENTS", intents);
+  await injectEnvLine(botName, "BOT_PREFIX", prefix);
+  await injectEnvLine(botName, "BOT_LOCALE", locale);
+
+  for (const name in databaseEnv) {
+    const value = databaseEnv[name];
+
+    await injectEnvLine(botName, name, value);
+  }
 
   const client = new Client<true>({ intents: [] });
   if (token) {
@@ -81,7 +72,7 @@ export async function initialize(
     } catch (error) {
       throw new Error("Invalid token given.");
     }
-    await injectEnvLine("BOT_TOKEN", token);
+    await injectEnvLine(botName, "BOT_TOKEN", token);
   }
 
   if (!client.isReady()) throw new Error("Discord Client connection error");

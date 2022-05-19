@@ -1,8 +1,8 @@
 import cp from "child_process";
 import { join } from "path";
-import { grey } from "chalk";
 import { CliUx } from "@oclif/core";
 import { writeFile, readFile } from "fs/promises";
+import { grey, redBright, green } from "chalk";
 
 export function getBotPath(botName: string, ...segment: string[]) {
   return join(process.cwd(), botName, ...segment);
@@ -36,8 +36,27 @@ export async function useTemplate(
   await writeFile(path, template);
 }
 
-export async function injectEnvLine(name: string, value: string) {
-  const env = await readFile(getBotPath(".env"), "utf8");
+export function colorizeCommand(command: string): string {
+  return `${grey("$")} ${command
+    .split(/\s+/)
+    .map((part, i) => {
+      return i === 0
+        ? redBright(part)
+        : part.includes("[")
+        ? grey(part)
+        : part.includes('"') || part.includes(".")
+        ? green(part)
+        : part;
+    })
+    .join(" ")}`;
+}
+
+export async function injectEnvLine(
+  botName: string,
+  name: string,
+  value: string
+) {
+  const env = await readFile(getBotPath(botName, ".env"), "utf8");
   const lines = env.split("\n");
   const index = lines.findIndex((line) => line.split("=")[0] === name);
 
@@ -45,7 +64,7 @@ export async function injectEnvLine(name: string, value: string) {
 
   lines.push(`${name}="${value}"`);
 
-  await writeFile(getBotPath(".env"), lines.join("\n"), "utf8");
+  await writeFile(getBotPath(botName, ".env"), lines.join("\n"), "utf8");
 }
 
 export async function loader(message: string, callback: () => unknown) {

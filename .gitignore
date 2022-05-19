@@ -5,6 +5,7 @@ package-lock.json
 pnpm-lock.yaml
 .idea
 .vscode
+.env
 /.nyc_output
 /dist
 /lib
@@ -12,3 +13,4 @@ pnpm-lock.yaml
 /tmp
 node_modules
 oclif.manifest.json
+/bot.ts/

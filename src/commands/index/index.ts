@@ -4,12 +4,19 @@ import { blueBright, grey } from "chalk";
 import { Client } from "discord.js";
 import { prompt } from "inquirer";
 import figlet from "figlet";
-import boxen from "boxen";
+//import boxen from "boxen";
 import Listr from "listr";
 
-import { borderNone, exec, getBotPath, locales } from "../../app/utils";
+import {
+  borderNone,
+  colorizeCommand,
+  exec,
+  getBotPath,
+  injectEnvLine,
+  locales,
+} from "../../app/utils";
 import { setupDatabase, initialize } from "../../app/actions";
-import { databases } from "../../app/database";
+import { Database, databases } from "../../app/database";
 
 export class CreateBot extends Command {
   static flags = {
@@ -27,32 +34,23 @@ export class CreateBot extends Command {
 
   async run() {
     console.log(
-      boxen(
-        blueBright(
-          await new Promise<string>((resolve) =>
-            figlet("bot.ts", (err, value) => {
-              if (err) resolve("");
-              else resolve(value as string);
-            })
-          )
-        ),
-        {
-          float: "center",
-          borderStyle: borderNone,
-        }
+      //boxen(
+      blueBright(
+        await new Promise<string>((resolve) =>
+          figlet("bot.ts", (err, value) => {
+            if (err) resolve("");
+            else resolve(value as string);
+          })
+        )
       )
+      //   {
+      //     float: "center",
+      //     borderStyle: borderNone,
+      //   }
+      // )
     );
 
     const { flags } = await this.parse(CreateBot);
-
-    if (
-      !(await CliUx.ux.confirm(
-        `Do you really want to create your project in this folder?\n${blueBright(
-          getBotPath("")
-        )}`
-      ))
-    )
-      return process.exit(0);
 
     const name =
       flags.name ??
@@ -73,6 +71,15 @@ export class CreateBot extends Command {
       }
     }
 
+    if (
+      !(await CliUx.ux.confirm(
+        `Do you really want to create your project in the following directory?\n${blueBright(
+          getBotPath(name)
+        )} ${grey("[y/N]")}`
+      ))
+    )
+      return process.exit(0);
+
     const databaseName =
       flags.database ??
       ((
@@ -89,6 +96,31 @@ export class CreateBot extends Command {
         ])
       ).database as string);
 
+    const database = databases.find(
+      (db) => db.name === databaseName
+    ) as Database;
+
+    const databaseEnv: Record<string, string> = {};
+
+    if (Object.keys(database.defaults).length > 0) {
+      CliUx.ux.log(`Now we will ${blueBright("prepare the database")}.`);
+
+      for (const name in database.defaults) {
+        const def = database.defaults[name];
+
+        const value = await CliUx.ux.prompt(
+          `${grey("==>")} What is the ${blueBright(name)}?`,
+          {
+            required: !!def,
+            default: def ?? undefined,
+            type: name === "password" ? "hide" : "normal",
+          }
+        );
+
+        databaseEnv[`DB_${name.toUpperCase()}`] = value;
+      }
+    }
+
     const token =
       flags.token ??
       (await CliUx.ux.prompt(
@@ -103,10 +135,6 @@ export class CreateBot extends Command {
         await client.login(token);
       } catch (error) {
         return this.error("Invalid token given");
-      }
-
-      if (!client.isReady()) {
-        return this.error("discord.js is not ready");
       }
 
       client.destroy();
@@ -131,7 +159,25 @@ export class CreateBot extends Command {
             choices: locales,
           },
         ])
-      ).database as string);
+      ).locale as string);
+
+    const manager =
+      flags.manager ??
+      ((
+        await prompt([
+          {
+            type: "list",
+            name: "manager",
+            message: `Which ${blueBright(
+              "package manager"
+            )} bot.ts should use?`,
+            default: "npm",
+            choices: ["npm", "yarn", "pnpm"],
+          },
+        ])
+      ).manager as string);
+
+    CliUx.ux.log("");
 
     const tasks = new Listr([
       {
@@ -151,7 +197,10 @@ export class CreateBot extends Command {
       },
       {
         title: "Initialize bot.ts",
-        task: () => initialize(name, token, prefix, locale).then(() => "Done"),
+        task: () =>
+          initialize(name, token, prefix, locale, databaseEnv).then(
+            () => "Done"
+          ),
       },
       {
         title: "Init database file",
@@ -159,57 +208,60 @@ export class CreateBot extends Command {
       },
       {
         title: "Install dependencies",
-        task: () => exec("npm i", { cwd: getBotPath(name) }).then(() => "Done"),
+        task: () =>
+          exec(
+            manager === "yarn"
+              ? "yarn install"
+              : manager === "npm"
+              ? "npm i"
+              : "pnpm install",
+            { cwd: getBotPath(name) }
+          ).then(() => "Done"),
       },
     ]);
 
     await tasks.run();
 
     this.log(
-      boxen(
+      blueBright(
         await new Promise<string>((resolve) =>
-          figlet(blueBright(name), (err, value) => {
+          figlet(name, (err, value) => {
             if (err) resolve("");
             else resolve(value as string);
           })
         )
-      ),
-      {
-        float: "center",
-        borderStyle: borderNone,
-      }
-    );
-
-    const $ = grey("$");
-
-    this.log(
-      boxen(
-        [
-          "",
-          grey("# to quickly create a new file"),
-          "  " + $ + " yarn create bot.ts command [name]",
-          "  " + $ + " make listener [ClientEvent]",
-          "  " + $ + " make namespace [name]",
-          "  " + $ + " make table [name]",
-          "",
-          grey("# to watch typescript and reload " + name),
-          "  " + $ + " npm run watch",
-          "",
-          grey("# to build typescript and start " + name),
-          "  " + $ + " npm run start",
-          "",
-          grey("# to simply start " + name),
-          "  " + $ + " node .",
-          "",
-          grey("# format your files with prettier"),
-          "  " + $ + " npm run format",
-          "",
-        ].join("\n"),
-        {
-          float: "center",
-          borderStyle: borderNone,
-        }
       )
     );
+
+    const runCommand = manager === "npm" ? "npm run" : manager;
+
+    this.log(`
+
+  -> ${colorizeCommand(`cd ./${name}`)} <-
+
+  ${grey("# to quickly create a new file")}
+    ${colorizeCommand("create command [name]")}
+    ${colorizeCommand("create listener [ClientEvent]")}
+    ${colorizeCommand("create namespace [name]")}
+    ${colorizeCommand("create table [name]")}
+
+  ${grey("# to watch typescript and reload " + name)}
+    ${colorizeCommand(runCommand + " watch")}
+
+  ${grey("# to build typescript and start " + name)}
+    ${colorizeCommand(runCommand + " start")}
+
+  ${grey("# to simply start " + name)}
+    ${colorizeCommand("node .")}
+
+  ${grey("# to format your files with prettier")}
+    ${colorizeCommand(runCommand + " format")}
+
+  ${grey("# to update the bot.ts framework")}
+    ${colorizeCommand(runCommand + " update")}
+
+   `);
+
+    process.exit(0);
   }
 }
