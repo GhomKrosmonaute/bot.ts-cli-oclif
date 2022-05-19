@@ -1,24 +1,25 @@
-import { CliUx, Command, Flags } from "@oclif/core";
-import { blueBright, green, grey, bgBlack } from "chalk";
-import { Client } from "discord.js";
-import { prompt } from "inquirer";
-import figlet from "figlet";
-import Listr from "listr";
+import { CliUx, Command, Flags } from "@oclif/core"
+import { blueBright, green, grey, bgBlack } from "chalk"
+import { Client } from "discord.js"
+import { prompt } from "inquirer"
+import figlet from "figlet"
+import Listr from "listr"
 
 import {
   colorizeCommand,
-  data,
+  context,
   exec,
   getBotPath,
   locales,
+  Mode,
   printTitle,
   validateNameInput,
-} from "../../app/utils";
-import { initialize, setupDatabase } from "../../app/actions";
-import { Database, databases } from "../../app/database";
+} from "../../app/utils"
+import { initialize, setupDatabase } from "../../app/actions"
+import { Database, databases } from "../../app/database"
 
 export class CreateBot extends Command {
-  static args = [{ name: "name" }];
+  static args = [{ name: "name" }]
 
   static flags = {
     token: Flags.string({ char: "t" }),
@@ -27,26 +28,28 @@ export class CreateBot extends Command {
     manager: Flags.string({ char: "m", options: ["npm", "yarn", "pnpm"] }),
     database: Flags.string({ options: databases.map((db) => db.name) }),
     codeStyle: Flags.string({
-      options: ["options", "chain"],
+      options: ["options", "chains"],
       default: "options",
     }),
-  };
+  }
 
   async run() {
-    await printTitle("bot.ts");
+    await printTitle("bot.ts")
 
-    const { flags, args } = await this.parse(CreateBot);
+    const { flags, args } = await this.parse(CreateBot)
+
+    context.mode = flags.codeStyle as Mode
 
     const name =
       args.name ??
       (await CliUx.ux.prompt(`What is the ${blueBright("bot name")} ?`, {
         required: true,
         default: "bot.ts",
-      }));
+      }))
 
-    if (!validateNameInput(name)) return;
+    if (!validateNameInput(name)) return
 
-    data.botName = name;
+    context.botName = name
 
     if (
       !(await CliUx.ux.confirm(
@@ -57,7 +60,7 @@ export class CreateBot extends Command {
         )} ${grey("[y/n]")}`
       ))
     )
-      return process.exit(0);
+      return process.exit(0)
 
     const databaseName =
       flags.database ??
@@ -73,19 +76,19 @@ export class CreateBot extends Command {
             })),
           },
         ])
-      ).database as string);
+      ).database as string)
 
     const database = databases.find(
       (db) => db.name === databaseName
-    ) as Database;
+    ) as Database
 
-    const databaseEnv: Record<string, string> = {};
+    const databaseEnv: Record<string, string> = {}
 
     if (Object.keys(database.defaults).length > 0) {
-      CliUx.ux.log(`Now we will ${blueBright("prepare the database")}.`);
+      CliUx.ux.log(`Now we will ${blueBright("prepare the database")}.`)
 
       for (const name in database.defaults) {
-        const def = database.defaults[name];
+        const def = database.defaults[name]
 
         databaseEnv[`DB_${name.toUpperCase()}`] = await CliUx.ux.prompt(
           `${grey("=>")} What is the ${blueBright(name)}?`,
@@ -94,7 +97,7 @@ export class CreateBot extends Command {
             default: def ?? undefined,
             type: name === "password" ? "hide" : "normal",
           }
-        );
+        )
       }
     }
 
@@ -103,18 +106,18 @@ export class CreateBot extends Command {
       (await CliUx.ux.prompt(
         `${green("?")} Now put your ${blueBright("Discord app token")}`,
         { required: true, type: "mask" }
-      ));
+      ))
 
     {
-      const client = new Client<true>({ intents: [] });
+      const client = new Client<true>({ intents: [] })
 
       try {
-        await client.login(token);
+        await client.login(token)
       } catch (error) {
-        return this.error("Invalid token given");
+        return this.error("Invalid token given")
       }
 
-      client.destroy();
+      client.destroy()
     }
 
     const prefix =
@@ -127,7 +130,7 @@ export class CreateBot extends Command {
           required: true,
           default: "!",
         }
-      ));
+      ))
 
     const locale =
       flags.locale ??
@@ -141,7 +144,7 @@ export class CreateBot extends Command {
             choices: locales,
           },
         ])
-      ).locale as string);
+      ).locale as string)
 
     const manager =
       flags.manager ??
@@ -157,9 +160,9 @@ export class CreateBot extends Command {
             choices: ["npm", "yarn", "pnpm"],
           },
         ])
-      ).manager as string);
+      ).manager as string)
 
-    CliUx.ux.log("");
+    CliUx.ux.log("")
 
     const tasks = new Listr([
       {
@@ -187,22 +190,15 @@ export class CreateBot extends Command {
       {
         title: "Install bot.ts",
         task: () =>
-          exec(
-            manager === "yarn"
-              ? "yarn install"
-              : manager === "npm"
-              ? "npm i"
-              : "pnpm install",
-            { cwd: getBotPath() }
-          ).then(() => "Done"),
+          exec(`${manager} install`, { cwd: getBotPath() }).then(() => "Done"),
       },
-    ]);
+    ])
 
-    await tasks.run();
+    await tasks.run()
 
-    await printTitle(name);
+    await printTitle(name)
 
-    const runCommand = manager === "npm" ? "npm run" : manager;
+    const runCommand = manager === "npm" ? "npm run" : manager
 
     this.log(`
   ${grey("# to quickly create a new file")}
@@ -233,8 +229,8 @@ ${grey(
 Online documentation:${blueBright.underline(
       " https://ghom.gitbook.io/bot-ts/ "
     )}
-    `);
+    `)
 
-    process.exit(0);
+    process.exit(0)
   }
 }

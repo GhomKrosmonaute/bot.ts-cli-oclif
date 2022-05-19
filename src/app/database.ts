@@ -4,9 +4,9 @@ import {
   readJSON,
   useTemplate,
   writeJSON,
-} from "./utils";
-import { CliUx } from "@oclif/core";
-import { blueBright, green } from "chalk";
+} from "./utils"
+import { CliUx } from "@oclif/core"
+import { blueBright, green } from "chalk"
 
 export class Database {
   constructor(
@@ -19,7 +19,7 @@ export class Database {
     return {
       name: this.name,
       packageName: this.packageName,
-    };
+    }
   }
 }
 
@@ -28,7 +28,7 @@ const defaults = {
   user: "root",
   password: "",
   database: null,
-};
+}
 
 export const databases = [
   new Database("sqlite", "@vscode/sqlite3", {}),
@@ -40,6 +40,6 @@ export const databases = [
     port: "5432",
     ...defaults,
   }),
-];
+]
 
-export default databases;
+export default databases
