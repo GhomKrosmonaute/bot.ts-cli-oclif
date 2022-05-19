@@ -1,4 +1,4 @@
-create-bot.ts
+@ghom/create-bot.ts
 =============
 
 CLI for make Discord bots in TypeScript quickly with discord.js
@@ -9,17 +9,23 @@ CLI for make Discord bots in TypeScript quickly with discord.js
 [![Downloads/week](https://img.shields.io/npm/dw/oclif-hello-world.svg)](https://npmjs.org/package/oclif-hello-world)
 [![License](https://img.shields.io/npm/l/oclif-hello-world.svg)](https://github.com/oclif/hello-world/blob/main/package.json)
 
-## Install create-bot.ts and create bot
+## Usage
 
 ```shell
-$ yarn add -g @ghom/create-bot.ts
-$ create bot
+$ npm install -g @ghom/create-bot.ts
+$ create bot "my-bot"
+$ cd "my-bot"
+$ create command "my-command"
+# Enjoy!
 ```
 
-## Create bot without installing create-bot.ts
+## Usage without global install
+
+> YARN'S "create" COMMAND DOES NOT WORK BECAUSE I CANNOT NAME THIS PACKAGE "create-bot.ts" DUE TO ANOTHER PACKAGE WHOSE NAME IS TOO CLOSE TO MINE ([create-bot-ts](https://www.npmjs.com/package/create-bot-ts))
 
 ```shell
-$ yarn create bot.ts bot
-# or
-$ npx create-bot.ts bot
+$ npx @ghom/create-bot.ts bot "my-bot"
+$ cd "my-bot"
+$ npx @ghom/create-bot.ts command "my-command"
+# Enjoy!
 ```
