@@ -2,8 +2,9 @@ import cp from "child_process";
 import { join } from "path";
 import { CliUx } from "@oclif/core";
 import { writeFile, readFile } from "fs/promises";
-import { grey, redBright, green } from "chalk";
+import { grey, redBright, green, blueBright } from "chalk";
 import { validateNpm } from "is-valid-package-name";
+import figlet from "figlet";
 
 export function getBotPath(...segment: string[]) {
   return join(process.cwd(), data.botName ?? "", ...segment);
@@ -50,6 +51,19 @@ export function colorizeCommand(command: string): string {
         : part;
     })
     .join(" ")}`;
+}
+
+export async function printTitle(text: string) {
+  CliUx.ux.log(
+    blueBright(
+      await new Promise<string>((resolve) =>
+        figlet(text, (err, value) => {
+          if (err) resolve("");
+          else resolve(value as string);
+        })
+      )
+    )
+  );
 }
 
 export async function injectEnvLine(name: string, value: string) {

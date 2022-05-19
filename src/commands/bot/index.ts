@@ -11,6 +11,7 @@ import {
   exec,
   getBotPath,
   locales,
+  printTitle,
   validateNameInput,
 } from "../../app/utils";
 import { initialize, setupDatabase } from "../../app/actions";
@@ -32,22 +33,7 @@ export class CreateBot extends Command {
   };
 
   async run() {
-    console.log(
-      //boxen(
-      blueBright(
-        await new Promise<string>((resolve) =>
-          figlet("bot.ts", (err, value) => {
-            if (err) resolve("");
-            else resolve(value as string);
-          })
-        )
-      )
-      //   {
-      //     float: "center",
-      //     borderStyle: borderNone,
-      //   }
-      // )
-    );
+    await printTitle("bot.ts");
 
     const { flags, args } = await this.parse(CreateBot);
 
@@ -214,16 +200,7 @@ export class CreateBot extends Command {
 
     await tasks.run();
 
-    this.log(
-      blueBright(
-        await new Promise<string>((resolve) =>
-          figlet(name, (err, value) => {
-            if (err) resolve("");
-            else resolve(value as string);
-          })
-        )
-      )
-    );
+    await printTitle(name);
 
     const runCommand = manager === "npm" ? "npm run" : manager;
 
@@ -253,6 +230,9 @@ ${green("√")} Successfully generated your bot.
 ${grey(
   "Before using create-bot.ts scripts, go to the bot folder with"
 )} ${bgBlack(colorizeCommand(`cd ${name}`))}
+Online documentation:${blueBright.underline(
+      " https://ghom.gitbook.io/bot-ts/ "
+    )}
     `);
 
     process.exit(0);
