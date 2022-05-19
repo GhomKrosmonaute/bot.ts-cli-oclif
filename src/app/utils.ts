@@ -27,7 +27,7 @@ export async function useTemplate(
   replacers: Record<string, string>,
   path: string
 ) {
-  let template = await readFile(getCliPath("templates", templateName), "utf-8")
+  let template = await readFile(getCliPath("files", templateName), "utf-8")
 
   for (const pattern in replacers) {
     const replacer = replacers[pattern]
