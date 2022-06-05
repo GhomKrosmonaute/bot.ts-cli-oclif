@@ -10,7 +10,8 @@ import {
 import databases from "./database"
 import { writeFile } from "fs/promises"
 import { Client } from "discord.js"
-import { CliUx } from "@oclif/core"
+import git from "degit"
+import path from "path"
 
 export async function setupDatabase(databaseName: string) {
   const pkg = await readJSON(getBotPath("package.json"))
@@ -27,6 +28,14 @@ export async function setupDatabase(databaseName: string) {
   await writeJSON(getBotPath("package.json"), pkg)
 
   await useTemplate(databaseName, {}, getBotPath("src", "app", "database.ts"))
+}
+
+export async function download(branch: string) {
+  return git(`GhomKrosmonaute/bot.ts/${branch}`, {
+    force: true,
+    verbose: false,
+    cache: false,
+  }).clone(getBotPath())
 }
 
 export async function initialize(

@@ -15,7 +15,7 @@ import {
   printTitle,
   validateNameInput,
 } from "../../app/utils"
-import { initialize, setupDatabase } from "../../app/actions"
+import { download, initialize, setupDatabase } from "../../app/actions"
 import { Database, databases } from "../../app/database"
 
 export class CreateBot extends Command {
@@ -179,17 +179,9 @@ export class CreateBot extends Command {
       {
         title: "Download bot.ts",
         task: () =>
-          exec(
-            [
-              "git clone",
-              "--depth=1",
-              "--single-branch",
-              "--branch=" +
-                (flags.codeStyle === "options" ? "master" : "design"),
-              "https://github.com/CamilleAbella/bot.ts.git",
-              `"${name}"`,
-            ].join(" ")
-          ).then(() => "Done"),
+          download(flags.codeStyle === "options" ? "master" : "design").then(
+            () => "Done"
+          ),
       },
       {
         title: "Initialize bot.ts",
