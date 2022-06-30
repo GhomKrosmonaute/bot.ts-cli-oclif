@@ -1,4 +1,4 @@
-// make command [name:string]
+// make listener [event:string]
 
 import {
   context,
@@ -13,11 +13,17 @@ import { CliUx, Command, Flags } from "@oclif/core"
 import { blueBright, green, grey } from "chalk"
 import { join, relative } from "path"
 
-export default class CreateCommand extends Command {
-  static args = [{ name: "name" }]
+export default class CreateListener extends Command {
+  static args = [{ name: "event" }]
+
+  static flags = {
+    name: Flags.string({ options: [] }),
+  }
 
   async run() {
-    const { args } = await this.parse(CreateCommand)
+    const { args } = await this.parse(CreateListener)
+
+    // todo: finish that
 
     if (!(await isOnBotDir()))
       return CliUx.ux.error("You are not in a bot.ts folder")

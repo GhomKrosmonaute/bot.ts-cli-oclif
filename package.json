@@ -72,6 +72,7 @@
     "semi": false
   },
   "scripts": {
+    "events": "node scripts/fetchEvents.js && prettier --write src/events.json",
     "build": "shx rm -rf dist && tsc -b",
     "postpack": "shx rm -f oclif.manifest.json",
     "prepack": "yarn build && oclif manifest && oclif readme",

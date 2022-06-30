@@ -1,6 +1,7 @@
 import cp from "child_process"
 import { join } from "path"
 import { CliUx } from "@oclif/core"
+import { ClientEvents } from "discord.js"
 import { writeFile, readFile } from "fs/promises"
 import { grey, redBright, green, blueBright } from "chalk"
 import { validateNpm } from "is-valid-package-name"
