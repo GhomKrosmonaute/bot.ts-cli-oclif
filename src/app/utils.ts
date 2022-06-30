@@ -1,11 +1,12 @@
 import cp from "child_process"
-import { join } from "path"
+import { join, relative } from "path"
 import { CliUx } from "@oclif/core"
 import { ClientEvents } from "discord.js"
 import { writeFile, readFile } from "fs/promises"
 import { grey, redBright, green, blueBright } from "chalk"
 import { validateNpm } from "is-valid-package-name"
 import figlet from "figlet"
+import { existsSync } from "fs"
 
 export function getBotPath(...segment: string[]) {
   return join(process.cwd(), context.botName ?? "", ...segment)
@@ -37,6 +38,16 @@ export async function useTemplate(
   }
 
   await writeFile(path, template)
+}
+
+export function alreadyExists(path: string): boolean {
+  if (existsSync(path)) {
+    CliUx.ux.error(`A file already exists at this location.\n${grey(path)}`)
+
+    return true
+  }
+
+  return false
 }
 
 export function colorizeCommand(command: string): string {
@@ -106,9 +117,9 @@ export async function exec(
   })
 }
 
-export function validateNameInput(name: string): true | never {
+export function validatePackageName(name: string): true | never {
   if (name.length < 2) {
-    return CliUx.ux.error("The bot name must be longer than 1")
+    return CliUx.ux.error("The value must be longer than 1")
   }
 
   const [isValid, reason] = validateNpm(name)
@@ -120,17 +131,46 @@ export function validateNameInput(name: string): true | never {
   return true
 }
 
+export function validateFilename(name: string): true | never {
+  if (name.length < 3) {
+    return CliUx.ux.error("The value must be longer than 2")
+  }
+
+  if (!/^[.a-z]+$/i.test(name)) {
+    return CliUx.ux.error(
+      "The value must contain only dots and alphabetic chars"
+    )
+  }
+
+  if (/\.[jt]sx?$/i.test(name)) {
+    return CliUx.ux.error("The value must not ends with a file extension")
+  }
+
+  return true
+}
+
 export async function isOnBotDir(): Promise<boolean> {
   try {
     const pkg = await readJSON(getBotPath("package.json"))
     return (
       pkg.devDependencies.hasOwnProperty("@ghom/create-bot.ts") ||
-      pkg.devDependencies.hasOwnProperty("make-bot.ts")
+      pkg.devDependencies.hasOwnProperty("make-bot.ts") ||
+      pkg.devDependencies.hasOwnProperty("make-ts-bot") ||
+      pkg.devDependencies.hasOwnProperty("create-bot.ts")
     )
   } catch (err) {
     return false
   }
 }
+
+export function displayPath(path: string) {
+  return `${grey("=>")} ${blueBright(relative(getBotPath(), path))}`
+}
+
+export const events: Record<
+  keyof ClientEvents,
+  string[]
+> = require("../../events.json")
 
 export const locales = ["en", "fr", "es", "de", "ja"]
 

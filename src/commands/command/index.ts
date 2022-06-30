@@ -7,11 +7,12 @@ import {
   isOnBotDir,
   printTitle,
   useTemplate,
-  validateNameInput,
+  validateFilename,
+  displayPath,
+  alreadyExists,
 } from "../../app/utils"
-import { CliUx, Command, Flags } from "@oclif/core"
-import { blueBright, green, grey } from "chalk"
-import { join, relative } from "path"
+import { CliUx, Command } from "@oclif/core"
+import { blueBright, green } from "chalk"
 
 export default class CreateCommand extends Command {
   static args = [{ name: "name" }]
@@ -32,9 +33,11 @@ export default class CreateCommand extends Command {
         { required: true }
       ))
 
-    if (!validateNameInput(name)) return
+    if (!validateFilename(name)) return
 
     const commandPath = getBotPath("src", "commands", `${name}.ts`)
+
+    if (alreadyExists(commandPath)) return
 
     await useTemplate(
       (context.mode === "chains" ? "chain_" : "") + "command",
@@ -46,9 +49,8 @@ export default class CreateCommand extends Command {
     )
 
     CliUx.ux.log(
-      `${green("√")} Successfully generated the ${blueBright(
-        name
-      )} command.\n${grey("=>")} ${blueBright(relative(__dirname, commandPath))}
+      `${green("√")} Successfully generated the ${blueBright(name)} command.
+      ${displayPath(commandPath)}
       `
     )
   }

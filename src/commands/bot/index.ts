@@ -13,7 +13,7 @@ import {
   locales,
   Mode,
   printTitle,
-  validateNameInput,
+  validatePackageName,
 } from "../../app/utils"
 import { download, initialize, setupDatabase } from "../../app/actions"
 import { Database, databases } from "../../app/database"
@@ -58,7 +58,7 @@ export class CreateBot extends Command {
         default: "bot.ts",
       }))
 
-    if (!validateNameInput(name)) return
+    if (!validatePackageName(name)) return
 
     context.botName = name
 
