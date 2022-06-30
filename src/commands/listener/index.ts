@@ -75,7 +75,7 @@ export default class CreateListener extends Command {
 
     CliUx.ux.log(
       `${green("√")} Successfully generated the ${blueBright(name)} listener.
-      ${displayPath(listenerPath)}
+${displayPath(listenerPath)}
       `
     )
   }

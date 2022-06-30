@@ -50,7 +50,7 @@ export default class CreateCommand extends Command {
 
     CliUx.ux.log(
       `${green("√")} Successfully generated the ${blueBright(name)} command.
-      ${displayPath(commandPath)}
+${displayPath(commandPath)}
       `
     )
   }
