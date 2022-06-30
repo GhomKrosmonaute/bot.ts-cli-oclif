@@ -1,6 +1,6 @@
 {
   "name": "create-ts-bot",
-  "version": "0.0.1-beta",
+  "version": "0.0.2-beta",
   "description": "CLI for make Discord bots in TypeScript quickly with discord.js",
   "author": "GhomKrosmonaute @GhomKrosmonaute",
   "type": "commonjs",
