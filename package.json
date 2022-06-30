@@ -1,17 +1,14 @@
 {
-  "name": "@ghom/create-bot.ts",
-  "version": "1.0.7",
+  "name": "create-ts-bot",
+  "version": "0.0.1-beta",
   "description": "CLI for make Discord bots in TypeScript quickly with discord.js",
   "author": "GhomKrosmonaute @GhomKrosmonaute",
   "type": "commonjs",
   "bin": {
-    "create-bot.ts": "./bin/run",
-    "make-bot.ts": "./bin/run",
-    "create-bot": "./bin/run",
-    "make-bot": "./bin/run",
+    "create-ts-bot": "./bin/run",
+    "create-ts": "./bin/run",
     "create": "./bin/run",
-    "make": "./bin/run",
-    "bot": "./bin/run"
+    "ts": "./bin/run"
   },
   "homepage": "https://github.com/GhomKrosmonaute/create-bot.ts",
   "license": "MIT",
@@ -54,19 +51,15 @@
     "typescript": "^4.4.3"
   },
   "oclif": {
-    "bin": "create-bot.ts",
-    "dirname": "create-bot.ts",
+    "bin": "create-ts-bot",
+    "dirname": "create-ts-bot",
     "commands": "./dist/commands",
     "plugins": [
       "@oclif/plugin-help",
       "@oclif/plugin-plugins"
     ],
     "topicSeparator": " ",
-    "topics": {
-      "hello": {
-        "description": "Say hello to the world and others"
-      }
-    }
+    "topics": {}
   },
   "prettier": {
     "semi": false
@@ -75,16 +68,24 @@
     "events": "node scripts/fetchEvents.js && prettier --write src/events.json",
     "build": "shx rm -rf dist && tsc -b",
     "postpack": "shx rm -f oclif.manifest.json",
-    "prepack": "yarn build && oclif manifest && oclif readme",
+    "prepack": "yarn build",
     "version": "oclif readme && git add README.md",
-    "format": "prettier --write src"
+    "format": "prettier --write src package.json"
   },
   "engines": {
     "node": ">=16.14.2"
   },
   "bugs": "https://github.com/GhomKrosmonaute/create-bot.ts/issues",
   "keywords": [
-    "oclif"
+    "oclif",
+    "bot.ts",
+    "discord",
+    "bot",
+    "typescript",
+    "cli",
+    "generator",
+    "framework",
+    "boilerplate"
   ],
   "types": "dist/index.d.ts"
 }
