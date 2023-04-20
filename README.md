@@ -1,3 +1,5 @@
+# DEPRECATED (removed soon)
+
 @ghom/create-bot.ts
 =============
 
