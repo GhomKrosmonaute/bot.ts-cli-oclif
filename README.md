@@ -1,5 +1,7 @@
 # DEPRECATED (removed soon)
 
+## Please use [make-bot.ts](https://www.npmjs.com/package/make-bot.ts?activeTab=readme) instead!
+
 @ghom/create-bot.ts
 =============
 
